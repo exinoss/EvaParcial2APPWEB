@@ -1,0 +1,156 @@
+<div class="content-card">
+  <div class="card-header-custom">
+    <h2><i class="bi bi-people me-2"></i>Gestión de Autores</h2>
+    <div class="d-flex align-items-center gap-3">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Buscar por nombre, apellido o nacionalidad..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="filterAutores()"
+        />
+      </div>
+      <button class="btn-primary-custom" (click)="openAddModal()">
+        <i class="bi bi-plus-lg"></i> Nuevo Autor
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table-custom" *ngIf="filteredAutores.length > 0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Fecha Nacimiento</th>
+          <th>Nacionalidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let autor of filteredAutores; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            <strong>{{ autor.nombre }}</strong>
+          </td>
+          <td>{{ autor.apellido }}</td>
+          <td>{{ formatDate(autor.fechaNacimiento) }}</td>
+          <td>{{ autor.nacionalidad || '—' }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-action btn-edit" title="Editar" (click)="openEditModal(autor)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button
+                class="btn-action btn-delete"
+                title="Eliminar"
+                (click)="openDeleteModal(autor)"
+              >
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredAutores.length === 0">
+      <i class="bi bi-people"></i>
+      <p>No se encontraron autores</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agregar/Editar -->
+<div class="modal fade" id="autorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi" [ngClass]="isEditing ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ isEditing ? 'Editar Autor' : 'Nuevo Autor' }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.nombre"
+            placeholder="Ingrese el nombre"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Apellido</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.apellido"
+            placeholder="Ingrese el apellido"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha de Nacimiento</label>
+          <input type="date" class="form-control" [(ngModel)]="formData.fechaNacimiento" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nacionalidad</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.nacionalidad"
+            placeholder="Ej: Colombiana, Mexicana..."
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="saveAutor()">
+          <i class="bi" [ngClass]="isEditing ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div class="modal fade" id="deleteAutorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirmar Eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">
+          ¿Está seguro de eliminar al autor
+          <strong>{{ deleteTarget?.nombre }} {{ deleteTarget?.apellido }}</strong
+          >?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

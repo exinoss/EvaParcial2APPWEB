@@ -1,0 +1,186 @@
+<div class="content-card">
+  <div class="card-header-custom">
+    <h2><i class="bi bi-book me-2"></i>Gestión de Libros</h2>
+    <div class="d-flex align-items-center gap-3">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Buscar por título, género, ISBN o autor..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="filterLibros()"
+        />
+      </div>
+      <button class="btn-primary-custom" (click)="openAddModal()">
+        <i class="bi bi-plus-lg"></i> Nuevo Libro
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table-custom" *ngIf="filteredLibros.length > 0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Título</th>
+          <th>Género</th>
+          <th>Fecha Publicación</th>
+          <th>ISBN</th>
+          <th>Autores</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let libro of filteredLibros; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            <strong>{{ libro.titulo }}</strong>
+          </td>
+          <td>{{ libro.genero || '—' }}</td>
+          <td>{{ formatDate(libro.fechaPublicacion) }}</td>
+          <td>
+            <code>{{ libro.isbn }}</code>
+          </td>
+          <td>
+            <div class="autores-badges">
+              <span class="autor-badge" *ngFor="let autor of libro.autores">
+                {{ autor.nombre }} {{ autor.apellido }}
+              </span>
+              <span *ngIf="!libro.autores || libro.autores.length === 0" class="text-muted">—</span>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-action btn-edit" title="Editar" (click)="openEditModal(libro)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button
+                class="btn-action btn-delete"
+                title="Eliminar"
+                (click)="openDeleteModal(libro)"
+              >
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredLibros.length === 0">
+      <i class="bi bi-book"></i>
+      <p>No se encontraron libros</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agregar/Editar -->
+<div class="modal fade" id="libroModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi" [ngClass]="isEditing ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ isEditing ? 'Editar Libro' : 'Nuevo Libro' }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Título</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.titulo"
+            placeholder="Ingrese el título"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Género</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.genero"
+            placeholder="Ej: Ficción, Drama..."
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha de Publicación</label>
+          <input type="date" class="form-control" [(ngModel)]="formData.fechaPublicacion" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ISBN</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData.isbn"
+            placeholder="Ej: 978-0060883287"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Autores</label>
+          <div class="autores-selector" *ngIf="autores.length > 0">
+            <div
+              class="autor-option"
+              *ngFor="let autor of autores"
+              [class.selected]="isAutorSelected(autor.autorId)"
+              (click)="toggleAutor(autor.autorId)"
+            >
+              <i
+                class="bi"
+                [ngClass]="isAutorSelected(autor.autorId) ? 'bi-check-square-fill' : 'bi-square'"
+              ></i>
+              <span>{{ autor.nombre }} {{ autor.apellido }}</span>
+            </div>
+          </div>
+          <div *ngIf="autores.length === 0" class="text-muted small">
+            No hay autores registrados. Registre un autor primero.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="saveLibro()">
+          <i class="bi" [ngClass]="isEditing ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div class="modal fade" id="deleteLibroModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirmar Eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">
+          ¿Está seguro de eliminar el libro <strong>{{ deleteTarget?.titulo }}</strong
+          >?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

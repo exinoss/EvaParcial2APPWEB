@@ -1,0 +1,27 @@
+<!-- Header -->
+<header class="app-header">
+  <button class="btn-hamburger" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+    <i class="bi bi-list"></i>
+  </button>
+  <span class="header-title">Sistema de Gestión de Biblioteca</span>
+</header>
+
+<!-- Sidebar -->
+<nav class="app-sidebar" [class.collapsed]="sidebarCollapsed">
+  <a class="nav-link" routerLink="/libros" routerLinkActive="active">
+    <i class="bi bi-book"></i>
+    <span>Libros</span>
+  </a>
+  <a class="nav-link" routerLink="/autores" routerLinkActive="active">
+    <i class="bi bi-people"></i>
+    <span>Autores</span>
+  </a>
+</nav>
+
+<!-- Main Content -->
+<main class="app-main" [class.expanded]="sidebarCollapsed">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Toast -->
+<app-toast></app-toast>
